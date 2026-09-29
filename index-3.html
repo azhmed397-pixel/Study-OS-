@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F2F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Study OS">
+<meta name="description" content="مذاكرة ذكية: مراجعة متباعدة وسجل أخطاء وامتحانات شخصية">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>أحمد Study OS</title>
+<style>
+/* =====================================================================
+   DESIGN SYSTEM  ·  أحمد Study OS
+   1) Tokens (color roles, type scale, radii, spacing)  — light + real dark
+   2) Base
+   3) Components (group/cell, card, button, chip, seg, badge, ring, bar,
+      field, switch, sheet, page, tabbar, empty)
+   Every screen below is built only from these pieces.
+   ===================================================================== */
+
+/* ---------- 1) TOKENS ---------- */
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Arabic","SF Pro Text","Segoe UI","Noto Sans Arabic","Cairo",Tahoma,system-ui,sans-serif;
+
+  /* surfaces */
+  --bg:#F2F2F7;            /* grouped background */
+  --bg-outer:#E5E5EA;
+  --surface:#FFFFFF;       /* cards */
+  --surface-elev:#FFFFFF;  /* cards inside sheets */
+  --bg-sheet:#F2F2F7;
+  --bar:rgba(249,249,251,.82);
+  --fill:rgba(120,120,128,.08);
+  --fill2:rgba(120,120,128,.14);
+  --seg-on:#FFFFFF;
+  --sep:rgba(60,60,67,.16);
+
+  /* text */
+  --label:#0F0F12;
+  --label2:rgba(60,60,67,.66);
+  --label3:rgba(60,60,67,.34);
+
+  /* accent */
+  --accent:#5451D6;        /* text / icons */
+  --accent-solid:#5451D6;  /* fills */
+  --accent-tint:rgba(84,81,214,.12);
+  --hero:#4B48C9;
+  --on-accent:#FFFFFF;
+
+  /* status */
+  --green:#1E9E52; --orange:#E07B00; --red:#E0352B; --blue:#0A72E8;
+
+  /* subject palette */
+  --sc0:#5451D6; --sc1:#0E9FB0; --sc2:#E07B00; --sc3:#DB3F86; --sc4:#1E9E52; --sc5:#0A72E8;
+
+  /* radii + spacing */
+  --r-s:10px; --r-m:14px; --r-l:20px; --r-xl:28px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme="dark"]{
+  --bg:#000000;
+  --bg-outer:#000000;
+  --surface:#1C1C1E;
+  --surface-elev:#2C2C2E;
+  --bg-sheet:#1C1C1E;
+  --bar:rgba(22,22,24,.80);
+  --fill:rgba(120,120,128,.14);
+  --fill2:rgba(120,120,128,.26);
+  --seg-on:#636366;
+  --sep:rgba(84,84,88,.6);
+  --label:#F5F5F7;
+  --label2:rgba(235,235,245,.62);
+  --label3:rgba(235,235,245,.30);
+  --accent:#8B89FF;
+  --accent-solid:#6461EE;
+  --accent-tint:rgba(139,137,255,.20);
+  --hero:#3D3AA8;
+  --green:#32D074; --orange:#FF9F1A; --red:#FF5A50; --blue:#4DA3FF;
+  --sc0:#8B89FF; --sc1:#3CC8D8; --sc2:#FFA01F; --sc3:#FF6BA9; --sc4:#32D074; --sc5:#4DA3FF;
+}
+.c0{--cc:var(--sc0)}.c1{--cc:var(--sc1)}.c2{--cc:var(--sc2)}.c3{--cc:var(--sc3)}.c4{--cc:var(--sc4)}.c5{--cc:var(--sc5)}
+
+/* type scale (no letter-spacing: it breaks Arabic joining) */
+.t-large{font-size:34px;font-weight:700;line-height:1.25}
+.t-title{font-size:26px;font-weight:700;line-height:1.3}
+.t-head{font-size:17px;font-weight:600}
+.t-body{font-size:16px}
+.t-sub{font-size:14px;color:var(--label2)}
+.t-foot{font-size:13px;color:var(--label2)}
+
+/* ---------- 2) BASE ---------- */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg-outer);color:var(--label);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+#app{position:relative;height:100vh;height:100dvh;max-width:480px;margin:0 auto;background:var(--bg);overflow:hidden;transition:background .3s}
+@media(min-width:520px){#app{box-shadow:0 0 0 1px var(--sep)}}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:calc(var(--safe-t) + 8px) var(--s4) calc(110px + var(--safe-b));-webkit-overflow-scrolling:touch}
+.stack>*+*{margin-top:var(--s5)}
+.row{display:flex;align-items:center;gap:var(--s3)}
+.grow{flex:1;min-width:0}
+.hide{display:none!important}
+
+/* ---------- 3) COMPONENTS ---------- */
+/* nav row + icon button */
+.navrow{display:flex;align-items:center;justify-content:space-between;min-height:44px;margin-bottom:var(--s2)}
+.ibtn{width:36px;height:36px;border-radius:50%;background:var(--fill2);border:0;display:grid;place-items:center;color:var(--accent);flex:none}
+.eyebrow{font-size:13px;color:var(--label2);font-weight:500}
+
+/* section */
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 var(--s2) var(--s2)}
+.sec-h h3{font-size:19px;font-weight:700}
+.link{background:none;border:0;color:var(--accent);font-size:15px;font-weight:500}
+
+/* group + cell (grouped-list rows) */
+.group{background:var(--surface);border-radius:var(--r-l);overflow:hidden}
+.cell{display:flex;align-items:center;gap:var(--s3);width:100%;min-height:54px;padding:var(--s3) var(--s4);background:none;border:0;text-align:start;position:relative}
+button.cell:active{background:var(--fill)}
+.cell+.cell::before{content:"";position:absolute;top:0;inset-inline:var(--s4) 0;height:.5px;background:var(--sep)}
+.cell .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--accent-tint);color:var(--accent)}
+.cell .ico.tint,.ico.tint{background:color-mix(in srgb,var(--cc) 16%,transparent);color:var(--cc)}
+.cell .body{flex:1;min-width:0;display:flex;flex-direction:column}
+.cell .ttl{font-weight:600;overflow-wrap:anywhere}
+.cell .sub{font-size:14px;color:var(--label2)}
+.cell .end{display:flex;align-items:center;gap:6px;color:var(--label2);font-size:14px;flex:none}
+
+/* card */
+.card{background:var(--surface);border-radius:var(--r-l);padding:var(--s4)}
+.tile{background:var(--surface);border-radius:var(--r-l);padding:var(--s3) var(--s4)}
+.tile b{display:block;font-size:26px;font-weight:700;line-height:1.3}
+.tile span{font-size:13px;color:var(--label2)}
+button.tile{width:100%;border:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.grid3 .tile{padding:var(--s3)}
+.grid3 .tile b{font-size:22px}
+
+/* hero (Today's Focus) */
+.hero{position:relative;overflow:hidden;background:var(--hero);color:#fff;border-radius:var(--r-xl);padding:var(--s5) var(--s5) var(--s5)}
+.hero::after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;border:34px solid rgba(255,255,255,.07);inset-inline-end:-70px;top:-80px;pointer-events:none}
+.hero .eyebrow{color:rgba(255,255,255,.72);display:flex;align-items:center;gap:6px}
+.hero h2{font-size:26px;font-weight:700;line-height:1.35;margin:var(--s2) 0 var(--s1)}
+.hero p{color:rgba(255,255,255,.8);font-size:15px;margin-bottom:var(--s4)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);height:50px;padding:0 var(--s5);border:0;border-radius:var(--r-m);font-size:17px;font-weight:600;transition:transform .12s,opacity .12s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.block{width:100%}
+.btn.sm{height:36px;padding:0 var(--s4);font-size:15px;border-radius:18px}
+.btn.primary{background:var(--accent-solid);color:var(--on-accent)}
+.btn.tint{background:var(--accent-tint);color:var(--accent)}
+.btn.gray{background:var(--fill2);color:var(--label)}
+.btn.danger{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.btn.good{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.btn.onhero{background:#fff;color:#3B38B5}
+.btn.plain{background:none;color:var(--accent)}
+.btns{display:flex;gap:var(--s2)}
+.btns>.btn{flex:1;padding:0 var(--s2)}
+
+/* chip, badge, segmented */
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap}
+.chips.scrollx{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(var(--s4) * -1);padding-inline:var(--s4);scrollbar-width:none}
+.chips.scrollx::-webkit-scrollbar{display:none}
+.chip{height:36px;padding:0 var(--s4);border-radius:18px;background:var(--fill2);border:0;font-size:15px;font-weight:500;white-space:nowrap;flex:none}
+.chip.on{background:var(--accent-solid);color:var(--on-accent)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:9px;background:var(--fill2);color:var(--label2);white-space:nowrap}
+.badge.red{background:color-mix(in srgb,var(--red) 15%,transparent);color:var(--red)}
+.badge.orange{background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange)}
+.badge.green{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.badge.accent{background:var(--accent-tint);color:var(--accent)}
+.badge.tint{background:color-mix(in srgb,var(--cc) 16%,transparent);color:var(--cc)}
+.seg{display:flex;background:var(--fill2);border-radius:var(--r-s);padding:2px}
+.seg button{flex:1;height:32px;border:0;background:none;border-radius:8px;font-size:14px;font-weight:600;color:var(--label)}
+.seg button.on{background:var(--seg-on);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* progress: bar, ring, dots */
+.bar{height:6px;border-radius:3px;background:var(--fill2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--cc,var(--accent));transition:width .5s}
+.bar.thick{height:10px;border-radius:5px}
+.ring{position:relative;flex:none}
+.ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.dots{display:flex;gap:4px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--fill2)}
+.dots i.on{background:var(--cc,var(--accent))}
+
+/* forms */
+.frow{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);position:relative;min-height:52px}
+.frow+.frow::before{content:"";position:absolute;top:0;inset-inline:var(--s4) 0;height:.5px;background:var(--sep)}
+.frow label{font-size:16px;color:var(--label);flex:none}
+.frow.col{flex-direction:column;align-items:stretch;gap:var(--s2)}
+.in{flex:1;min-width:0;background:none;border:0;outline:0;font-size:17px;text-align:start}
+textarea.in{min-height:64px;resize:none;line-height:1.5;width:100%}
+.in::placeholder{color:var(--label3)}
+select.in{appearance:none;-webkit-appearance:none;background:var(--fill2);border-radius:var(--r-s);padding:8px 12px;font-size:16px;flex:1}
+.flabel{font-size:13px;color:var(--label2);margin:0 var(--s2) var(--s2)}
+.switch{position:relative;width:51px;height:31px;flex:none;margin-inline-start:auto}
+.switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;border-radius:16px;background:var(--fill2);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked+span{background:var(--green)}
+.switch input:checked+span::after{transform:translateX(-20px)}
+.swatches{display:flex;gap:var(--s3)}
+.sw{width:34px;height:34px;border-radius:50%;border:0;background:var(--cc);position:relative}
+.sw.on::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2.5px solid var(--cc)}
+
+/* empty state */
+.empty{text-align:center;padding:var(--s6) var(--s5);color:var(--label2)}
+.empty .ei{width:64px;height:64px;border-radius:20px;background:var(--accent-tint);color:var(--accent);display:grid;place-items:center;margin:0 auto var(--s4)}
+.empty h3{color:var(--label);font-size:19px;margin-bottom:var(--s1)}
+.empty p{font-size:15px;margin-bottom:var(--s4)}
+
+/* tab bar */
+.tabbar{position:absolute;inset-inline:0;bottom:0;z-index:10;display:flex;padding:6px 4px calc(6px + var(--safe-b));background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:.5px solid var(--sep)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--label2);font-size:11px;font-weight:600;padding:4px 0;position:relative}
+.tab.on{color:var(--accent)}
+.tab .nb{position:absolute;top:-1px;inset-inline-start:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;line-height:17px;font-weight:700}
+
+/* layers: sheets (modal), pages (push), full (sessions) */
+.layer{position:absolute;inset:0;z-index:20;pointer-events:none}
+.layer.in{pointer-events:auto}
+.layer.sheet .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.38);opacity:0;transition:opacity .28s}
+.layer.sheet.in .backdrop{opacity:1}
+.layer.sheet .panel{--surface:var(--surface-elev);position:absolute;inset-inline:0;bottom:0;max-height:92%;display:flex;flex-direction:column;background:var(--bg-sheet);border-radius:var(--r-xl) var(--r-xl) 0 0;transform:translateY(102%);transition:transform .34s cubic-bezier(.2,.85,.25,1);padding-bottom:var(--safe-b)}
+.layer.sheet.in .panel{transform:none}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--label3);margin:8px auto 0;flex:none}
+.snav{display:flex;align-items:center;justify-content:space-between;padding:var(--s3) var(--s4) var(--s2);flex:none}
+.snav b{font-size:17px}
+.snav button{background:none;border:0;color:var(--accent);font-size:17px;min-width:56px}
+.snav .save{font-weight:700;text-align:end}
+.sbody{overflow-y:auto;padding:var(--s2) var(--s4) var(--s5)}
+.layer.page,.layer.full{background:var(--bg);transition:transform .34s cubic-bezier(.2,.85,.25,1)}
+.layer.page{transform:translateX(-100%)}
+.layer.full{transform:translateY(100%)}
+.layer.page.in,.layer.full.in{transform:none}
+
+/* toast */
+.toast{position:absolute;bottom:calc(84px + var(--safe-b));inset-inline:var(--s5);z-index:40;text-align:center;background:var(--label);color:var(--bg);padding:12px 16px;border-radius:var(--r-m);font-weight:600;font-size:15px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}
+.toast.on{opacity:1;transform:none}
+
+/* ---------- screen-specific (built from the tokens above) ---------- */
+/* flip card */
+.flip{perspective:1400px;height:min(390px,54vh)}
+.flipper{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.3,.75,.2,1);transform-style:preserve-3d}
+.flip.on .flipper{transform:rotateY(180deg)}
+.flip.static .flipper{transition:none}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;background:var(--surface);border-radius:var(--r-xl);padding:var(--s5);display:flex;flex-direction:column;overflow:auto}
+.face.back{transform:rotateY(180deg);background:var(--accent-tint);background-color:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.face-top{display:flex;gap:var(--s2);flex-wrap:wrap}
+.face-main{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:700;line-height:1.5;padding:var(--s3) 0;overflow-wrap:anywhere}
+.face-main.sm{font-size:19px;font-weight:600}
+.face-hint{text-align:center;color:var(--label3);font-size:13px}
+.sess .ctl-b{display:none}
+.sess.flipped .ctl-b{display:block}
+.sess.flipped .ctl-a{display:none}
+.rate-note{font-size:12px;font-weight:500;opacity:.75;display:block}
+.btns.rate .btn{flex-direction:column;height:64px;gap:0;font-size:16px}
+
+/* focus timer */
+.focusring{display:flex;justify-content:center;margin:var(--s5) 0}
+.big-time{font-size:58px;font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;line-height:1.1}
+
+/* notes-style mistake cards */
+.note{background:var(--surface);border-radius:var(--r-l);padding:var(--s4);text-align:start;width:100%;border:0;display:block}
+.note:active{background:var(--fill)}
+.note .q{font-size:17px;font-weight:600;margin:var(--s2) 0;overflow-wrap:anywhere}
+.note .ans{background:color-mix(in srgb,var(--green) 11%,transparent);border-radius:var(--r-s);padding:var(--s2) var(--s3);font-size:15px;margin-bottom:var(--s2);overflow-wrap:anywhere}
+.note .meta{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+
+/* week chart */
+.week{display:flex;align-items:flex-end;gap:var(--s2);height:120px}
+.week div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;font-size:11px;color:var(--label2)}
+.week i{width:100%;max-width:30px;border-radius:8px;background:var(--fill2);min-height:6px}
+.week .today i{background:var(--accent-solid)}
+.week .has i{background:color-mix(in srgb,var(--accent-solid) 45%,var(--fill2))}
+.week .today.has i{background:var(--accent-solid)}
+.mini-line{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
+.mini-line:last-child{margin-bottom:0}
+.mini-line .l{width:64px;font-size:14px;flex:none}
+.mini-line .r{width:46px;text-align:end;font-size:13px;color:var(--label2);flex:none}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="root"></div>
+  <nav class="tabbar" id="tabbar" aria-label="التنقل الرئيسي"></nav>
+  <div id="layers"></div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+/* ============================ STORAGE ============================ */
+const KEY='ahmed-study-os-v1';
+const DEF={subjects:[],lessons:[],questions:[],sessions:[],exams:[],days:[],settings:{theme:'auto',name:'أحمد'}};
+let S=structuredClone(DEF);
+const LS=()=>window['local'+'Storage'];
+async function load(){
+  try{
+    let v=null;
+    if(window.storage){const r=await window.storage.get(KEY);v=r&&r.value}
+    else v=LS().getItem(KEY);
+    if(v)S=Object.assign(structuredClone(DEF),JSON.parse(v));
+  }catch(e){}
+  S.settings=Object.assign({theme:'auto',name:'أحمد'},S.settings||{});
+}
+let saveT=null;
+function save(){
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    const v=JSON.stringify(S);
+    try{ if(window.storage)await window.storage.set(KEY,v); else LS().setItem(KEY,v); }catch(e){}
+  },150);
+}
+
+/* ============================ HELPERS ============================ */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-3);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY=()=>ymd(new Date());
+const pd=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const diff=(a,b)=>Math.round((pd(a)-pd(b))/864e5);
+const pc=n=>Math.round(n*100);
+const daysTxt=n=>n===1?'يوم':n===2?'يومين':n<=10?`${n} أيام`:`${n} يوم`;
+const whenTxt=d=>{const n=diff(d,TODAY());return n<0?'متأخر '+daysTxt(-n):n===0?'النهارده':n===1?'بكرة':n===2?'بعد يومين':'بعد '+daysTxt(n)};
+const intTxt=n=>({1:'بكرة',3:'بعد 3 أيام',7:'بعد أسبوع',14:'بعد أسبوعين',30:'بعد شهر',60:'بعد شهرين'})[n]||('بعد '+daysTxt(n));
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),2200)}
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)();[0,.28,.56].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.2,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+.22);o.start(a.currentTime+t);o.stop(a.currentTime+t+.22)})}catch(e){}}
+function touch(){const t=TODAY();if(!S.days.includes(t))S.days.push(t)}
+
+/* ============================ ICONS ============================ */
+const ICON={
+ home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/>',
+ book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M8.5 7.5h7"/>',
+ repeat:'<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+ note:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+ chart:'<path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ back:'<path d="M9 5l7 7-7 7"/>',
+ chev:'<path d="M15 5l-7 7 7 7"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+ play:'<path d="M7 4.5v15l13-7.5z" fill="currentColor"/>',
+ pause:'<path d="M8 5v14M16 5v14" stroke-width="3.2"/>',
+ flame:'<path d="M12 22c4 0 7-2.7 7-6.5 0-3-2-5-3.5-6.5C15 11 13.5 12 13 12c0-3-1-6-4-9-.5 4-5 6-5 12.5C4 19.3 8 22 12 22z"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ exam:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 14l2 2 4-4"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".9" fill="currentColor"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+ alert:'<path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5M12 17.5v.01"/>',
+ sparkle:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>'
+};
+const ic=(n,s=22,w=1.8)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]||''}</svg>`;
+
+/* ============================ DESIGN-SYSTEM COMPONENTS (JS) ============================ */
+const at=o=>Object.entries(o||{}).map(([k,v])=>` data-${k}="${esc(v)}"`).join('');
+const ui={
+  btn:(label,o={})=>`<button class="btn ${o.kind||'primary'}${o.block?' block':''}${o.sm?' sm':''}" data-act="${o.act||''}"${at(o.data)}>${o.icon?ic(o.icon,20):''}${label}</button>`,
+  chip:(label,o={})=>`<button class="chip${o.on?' on':''}" data-act="${o.act||'pick'}"${at(o.data)}>${label}</button>`,
+  badge:(t,k='')=>`<span class="badge ${k}">${t}</span>`,
+  cell:o=>{
+    const tag=o.act?'button':'div';
+    const end=(o.end||'')+((o.act&&o.chev!==false)?ic('chev',16):'');
+    return `<${tag} class="cell ${o.cc||''}"${o.act?` data-act="${o.act}"`:''}${at(o.data)}>`+
+      (o.icon?`<span class="ico${o.cc?' tint':''}">${ic(o.icon,20)}</span>`:'')+
+      `<span class="body"><span class="ttl">${o.title}</span>${o.sub?`<span class="sub">${o.sub}</span>`:''}</span>`+
+      (end?`<span class="end">${end}</span>`:'')+`</${tag}>`;
+  },
+  group:c=>`<div class="group">${c.join('')}</div>`,
+  bar:(p,cc,thick)=>`<div class="bar${thick?' thick':''} ${cc||''}"><i style="width:${Math.max(0,Math.min(100,p))}%"></i></div>`,
+  ring:(p,o={})=>{const s=o.size||120,st=o.stroke||12,r=(s-st)/2,c=2*Math.PI*r,h=s/2;
+    return `<div class="ring" style="width:${s}px;height:${s}px"><svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}"><circle cx="${h}" cy="${h}" r="${r}" fill="none" stroke="var(--fill2)" stroke-width="${st}"/><circle cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${o.color||'var(--accent-solid)'}" stroke-width="${st}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-Math.min(1,p/100))}" transform="rotate(-90 ${h} ${h})"/></svg><div class="ring-c">${o.center||''}</div></div>`},
+  dots:(n,cc)=>`<div class="dots ${cc||''}">${[0,1,2,3,4,5].map(i=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`,
+  empty:(icon,title,text,btn)=>`<div class="empty"><div class="ei">${ic(icon,30)}</div><h3>${title}</h3><p>${text}</p>${btn||''}</div>`,
+  seg:(items,cur,act)=>`<div class="seg">${items.map(([v,l])=>`<button class="${v===cur?'on':''}" data-act="${act}" data-v="${v}">${l}</button>`).join('')}</div>`
+};
+ui.sec=(t,html,action)=>`<section><div class="sec-h"><h3>${t}</h3>${action||''}</div>${html}</section>`;
+
+/* ============================ DOMAIN ============================ */
+const INT=[1,3,7,14,30,60];
+const TYPES=['حفظ','فهم','حساب','تطبيق'];
+const REASONS=['سهو','مفهوم مش واضح','نسيت القانون','استعجال','خطأ في الحساب','فهمت السؤال غلط'];
+const COLORS=[0,1,2,3,4,5];
+const subj=i=>S.subjects.find(s=>s.id===i);
+const lesson=i=>S.lessons.find(l=>l.id===i);
+const quest=i=>S.questions.find(q=>q.id===i);
+const isDue=l=>l.studied&&l.next<=TODAY();
+const isLate=l=>l.studied&&l.next<TODAY();
+const dueLessons=()=>S.lessons.filter(isDue).sort((a,b)=>a.next.localeCompare(b.next));
+const lateLessons=()=>S.lessons.filter(isLate);
+const cls=sid=>'c'+((subj(sid)||{}).c||0);
+
+function schedule(l,rating){
+  if(rating==='hard')l.stage=0; else if(rating==='good')l.stage=Math.min(5,l.stage+1); else l.stage=Math.min(5,l.stage+2);
+  l.next=addD(TODAY(),INT[l.stage]);l.lastReview=TODAY();l.reviews=(l.reviews||0)+1;
+}
+function previewInt(l,rating){let s=l.stage;if(rating==='hard')s=0;else if(rating==='good')s=Math.min(5,s+1);else s=Math.min(5,s+2);return INT[s]}
+function markStudied(l){l.studied=true;l.studiedAt=TODAY();l.stage=0;l.next=addD(TODAY(),INT[0]);touch()}
+
+function subStats(sid){
+  const ls=S.lessons.filter(l=>l.sid===sid),st=ls.filter(l=>l.studied);
+  return{total:ls.length,studied:st.length,pct:ls.length?st.length/ls.length:0,due:st.filter(isDue).length,late:st.filter(isLate).length};
+}
+function overall(){
+  const total=S.lessons.length,st=S.lessons.filter(l=>l.studied);
+  const mastery=st.length?st.reduce((a,l)=>a+(l.stage+1)/6,0)/st.length:0;
+  return{total,studied:st.length,pct:total?st.length/total:0,mastery};
+}
+function typeStats(){
+  return TYPES.map(t=>{
+    let r=0,w=0;S.questions.forEach(q=>{if(q.type===t){r+=q.right||0;w+=q.wrong||0}});
+    const n=r+w;return{t,right:r,wrong:w,n,rate:n?w/n:0,smooth:(w+.5)/(n+2)};
+  });
+}
+const weakType=()=>typeStats().filter(x=>x.n>=3&&x.rate>=.3).sort((a,b)=>b.rate-a.rate)[0]||null;
+function priority(q,ts){
+  const t=ts.find(x=>x.t===q.type);
+  let p=1+(q.wrong||0)*1.5+(t?t.smooth:.25)*4-Math.min(q.streak||0,3)*.6;
+  if(q.lastWrong&&diff(TODAY(),q.lastWrong)<=7)p+=1;
+  return Math.max(.3,p);
+}
+function pickQ(pool,n){
+  const ts=typeStats(),items=pool.map(q=>({q,w:priority(q,ts)})),out=[];
+  while(out.length<n&&items.length){
+    const tot=items.reduce((a,x)=>a+x.w,0);let r=Math.random()*tot,i=0;
+    for(;i<items.length;i++){r-=items[i].w;if(r<=0)break}
+    if(i>=items.length)i=items.length-1;
+    out.push(items.splice(i,1)[0].q);
+  }
+  return out;
+}
+function qPool(sid){
+  const ok=S.questions.filter(q=>{const l=lesson(q.lid);return l&&l.studied&&(!sid||q.sid===sid)});
+  return ok.length||sid?ok:S.questions.slice();
+}
+function recordAnswer(q,ok,reason){
+  if(ok){q.right=(q.right||0)+1;q.streak=(q.streak||0)+1}
+  else{q.wrong=(q.wrong||0)+1;q.streak=0;q.lastWrong=TODAY();(q.reasons=q.reasons||[]).push({d:TODAY(),r:reason||null})}
+  q.last=TODAY();touch();save();
+}
+function setLastReason(q,r){const a=q.reasons||[];if(a.length)a[a.length-1].r=r;save()}
+const lastReason=q=>{const a=(q.reasons||[]).filter(x=>x.r);return a.length?a[a.length-1].r:null};
+function streak(){
+  const set=new Set(S.days);let n=0,d=TODAY();
+  if(!set.has(d))d=addD(d,-1);
+  while(set.has(d)){n++;d=addD(d,-1)}
+  return n;
+}
+const minsOn=d=>S.sessions.filter(x=>x.d===d).reduce((a,x)=>a+x.m,0);
+function nextToStudy(){
+  const un=S.lessons.filter(l=>!l.studied);if(!un.length)return null;
+  const exam=sid=>{const s=subj(sid);return s&&s.exam?diff(s.exam,TODAY()):9999};
+  return un.sort((a,b)=>exam(a.sid)-exam(b.sid))[0];
+}
+function focusPick(){
+  const due=dueLessons();
+  if(due.length){
+    const late=due.filter(isLate).length;
+    return{ic:'repeat',label:'مراجعة النهارده',title:`راجع ${due.length} ${due.length===1?'درس':'دروس'}`,
+      sub:late?`${late} منهم متأخر. ابدأ بيهم دلوقتي قبل ما تنساهم.`:'مواعيدهم النهارده. خمس دقايق لكل درس كفاية.',cta:'ابدأ المراجعة',act:'startReview'};
+  }
+  const w=weakType();
+  if(w&&qPool().some(q=>q.type===w.t))
+    return{ic:'target',label:'تدريب ذكي',title:`تدريب على أسئلة ${w.t}`,sub:`بتغلط في ${pc(w.rate)}% منها، فرفعنا أولويتها في التدريب.`,cta:'ابدأ التدريب',act:'startPractice'};
+  const nx=nextToStudy();
+  if(nx)return{ic:'book',label:'درس جديد',title:`ذاكر: ${esc(nx.title)}`,sub:`${esc((subj(nx.sid)||{}).name||'')}. شغّل جلسة تركيز وابدأ.`,cta:'ابدأ جلسة تركيز',act:'startFocus',data:{lid:nx.id}};
+  if(S.questions.length)return{ic:'exam',label:'كله تمام',title:'مفيش مراجعات النهارده',sub:'جرّب امتحان شخصي يقيس مستواك في اللي ذاكرته.',cta:'ابدأ امتحان',act:'startExam'};
+  return null;
+}
+
+/* ============================ LAYERS ============================ */
+const L=[];
+function paint(l){
+  const sc=l.el.querySelector('.scroll,.sbody');const top=sc?sc.scrollTop:0;
+  const html=l.render();
+  l.el.innerHTML=l.kind==='sheet'?`<div class="backdrop" data-act="close"></div><div class="panel"><div class="grab"></div>${html}</div>`:html;
+  const sc2=l.el.querySelector('.scroll,.sbody');if(sc2&&top)sc2.scrollTop=top;
+}
+function openLayer(kind,render,live,onClose){
+  const el=document.createElement('div');el.className='layer '+kind;$('layers').appendChild(el);
+  const l={el,kind,render,live,onClose};L.push(l);paint(l);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('in')));
+  return l;
+}
+function closeLayer(){
+  const l=L.pop();if(!l)return;
+  l.el.classList.remove('in');if(l.onClose)l.onClose();
+  setTimeout(()=>l.el.remove(),380);
+  renderAll();
+}
+const topLayer=()=>L[L.length-1];
+function renderAll(){
+  renderRoot();
+  L.forEach(l=>{if(l.live)paint(l)});
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&L.length)closeLayer()});
+
+/* ============================ ROOT / TABS ============================ */
+let tab='today',mFilter='all';
+const TABS=[['today','اليوم','home'],['subjects','المواد','book'],['review','مراجعة','repeat'],['mistakes','الأخطاء','note'],['progress','التقدم','chart']];
+function renderRoot(){
+  const scr={today:todayScreen,subjects:subjectsScreen,review:reviewScreen,mistakes:mistakesScreen,progress:progressScreen}[tab];
+  const old=$('root').querySelector('.scroll');const top=old&&old.dataset.tab===tab?old.scrollTop:0;
+  $('root').innerHTML=`<div class="scroll" data-tab="${tab}">${scr()}</div>`;
+  if(top)$('root').querySelector('.scroll').scrollTop=top;
+  const due=dueLessons().length;
+  $('tabbar').innerHTML=TABS.map(([k,l,i])=>`<button class="tab${k===tab?' on':''}" data-act="tab" data-tab="${k}" ${k===tab?'aria-current="page"':''}>${ic(i,25,k===tab?2.1:1.7)}<span>${l}</span>${k==='review'&&due?`<span class="nb">${due}</span>`:''}</button>`).join('');
+}
+const title=(t,right)=>`<div class="navrow"><span></span>${right||''}</div><h1 class="t-large" style="margin:0 var(--s2) var(--s4)">${t}</h1>`;
+
+/* ---------- Today ---------- */
+function greeting(){const h=new Date().getHours();return(h<12?'صباح الخير':h<18?'يومك سعيد':'مساء الخير')+' يا '+esc(S.settings.name||'أحمد')}
+function todayScreen(){
+  const dateTxt=new Date().toLocaleDateString('ar-EG-u-nu-latn',{weekday:'long',day:'numeric',month:'long'});
+  const head=`<div class="navrow"><span class="eyebrow">أحمد Study OS · ${dateTxt}</span><button class="ibtn" data-act="settings" aria-label="الإعدادات">${ic('gear',20)}</button></div>
+    <h1 class="t-large" style="margin:0 var(--s2) var(--s4)">${greeting()}</h1>`;
+  if(!S.subjects.length){
+    return head+`<div class="card" style="padding:var(--s2)">${ui.empty('sparkle','ابدأ من هنا','ضيف موادك ودروسك، والبرنامج هيحسب لك مواعيد المراجعة ويتعلم من أخطائك.',
+      `<div class="stack" style="margin-top:0">${ui.btn('ضيف أول مادة',{act:'addSubject',block:1,icon:'plus'})}${ui.btn('جرّب ببيانات تجريبية',{act:'demo',kind:'tint',block:1})}</div>`)}</div>`;
+  }
+  const f=focusPick(),due=dueLessons(),o=overall(),tm=minsOn(TODAY());
+  let out=head+'<div class="stack">';
+  out+=f?`<div class="hero"><div class="eyebrow">${ic(f.ic,16,2)} Today's Focus · ${f.label}</div><h2>${f.title}</h2><p>${f.sub}</p>${ui.btn(f.cta,{act:f.act,data:f.data,kind:'onhero'})}</div>`
+    :`<div class="hero"><div class="eyebrow">${ic('sparkle',16,2)} Today's Focus</div><h2>ضيف دروس وأسئلة</h2><p>كل ما تضيف محتوى أكتر، الخطة بتبقى أذكى.</p>${ui.btn('ضيف درس',{act:'addLesson',kind:'onhero'})}</div>`;
+  out+=`<div class="grid3">
+    <div class="tile"><b>${tm}</b><span>دقيقة النهارده</span></div>
+    <div class="tile"><b>${streak()}</b><span>يوم متتالي</span></div>
+    <div class="tile"><b style="${due.length?'color:var(--orange)':''}">${due.length}</b><span>مراجعة مستنياك</span></div></div>`;
+  out+=`<div class="btns">${ui.btn('جلسة تركيز',{act:'startFocus',icon:'clock',kind:'tint'})}${ui.btn('امتحان شخصي',{act:'startExam',icon:'exam',kind:'tint'})}</div>`;
+  /* plan */
+  const rows=due.slice(0,3).map(l=>ui.cell({icon:'repeat',cc:cls(l.sid),title:esc(l.title),sub:esc((subj(l.sid)||{}).name||''),end:ui.badge(whenTxt(l.next),isLate(l)?'red':'orange'),act:'openLesson',data:{id:l.id}}));
+  const w=weakType();
+  if(w)rows.push(ui.cell({icon:'target',title:`تدريب على أسئلة ${w.t}`,sub:`نسبة الغلط ${pc(w.rate)}%`,end:ui.badge('أولوية','accent'),act:'startPractice'}));
+  const nx=nextToStudy();
+  if(nx)rows.push(ui.cell({icon:'book',cc:cls(nx.sid),title:esc(nx.title),sub:'درس لسه ما اتذاكرش',act:'openLesson',data:{id:nx.id}}));
+  out+=ui.sec('خطة النهارده',rows.length?ui.group(rows):`<div class="card t-sub" style="text-align:center">مفيش حاجة مستنياك. أخدت يومك.</div>`);
+  /* progress */
+  const subs=S.subjects.slice(0,4).map(s=>{const st=subStats(s.id);return `<div class="mini-line ${'c'+s.c}"><span class="l">${esc(s.name)}</span><div class="grow">${ui.bar(st.pct*100)}</div><span class="r">${pc(st.pct)}%</span></div>`}).join('');
+  out+=ui.sec('المتابعة والتقدم',`<button class="card row" data-act="tab" data-tab="progress" style="width:100%;border:0;text-align:start;gap:var(--s4)">
+    ${ui.ring(o.pct*100,{size:88,stroke:9,center:`<b style="font-size:20px">${pc(o.pct)}%</b>`})}
+    <div class="grow">${subs}</div></button>`);
+  return out+'</div>';
+}
+
+/* ---------- Subjects ---------- */
+function subjectsScreen(){
+  const add=`<button class="ibtn" data-act="addSubject" aria-label="مادة جديدة">${ic('plus',20,2.2)}</button>`;
+  let out=title('المواد',add);
+  if(!S.subjects.length)return out+ui.empty('book','لسه مفيش مواد','ابدأ بمادة زي فيزياء أو كيمياء وضيف دروسها.',ui.btn('ضيف مادة',{act:'addSubject',icon:'plus'}));
+  out+=ui.group(S.subjects.map(s=>{const st=subStats(s.id);
+    const ex=s.exam?ui.badge('امتحان '+whenTxt(s.exam).replace('متأخر','فات'),diff(s.exam,TODAY())<=7?'orange':''):'';
+    return ui.cell({icon:'book',cc:'c'+s.c,title:esc(s.name),sub:`${st.total} درس · اتذاكر ${pc(st.pct)}%${st.late?` · ${st.late} متأخر`:''}`,end:ex,act:'openSubject',data:{id:s.id}})}));
+  out+=`<div style="margin-top:var(--s5)">${ui.btn('ضيف درس',{act:'addLesson',kind:'tint',block:1,icon:'plus'})}</div>`;
+  return out;
+}
+
+/* ---------- Review hub ---------- */
+function reviewScreen(){
+  let out=title('مراجعة');
+  const due=dueLessons(),w=weakType(),pool=qPool();
+  out+='<div class="stack">';
+  out+=`<div class="card"><div class="row"><span class="ico tint c0" style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--accent-tint);color:var(--accent)">${ic('repeat',24)}</span>
+    <div class="grow"><div class="t-head">مراجعة الدروس</div><div class="t-sub">${due.length?`${due.length} ${due.length===1?'درس':'دروس'} مستنيك${lateLessons().length?' (فيهم متأخر)':''}`:'مفيش مراجعات مستحقة دلوقتي'}</div></div></div>
+    <div style="margin-top:var(--s3)">${ui.btn(due.length?'ابدأ المراجعة':'مفيش حاجة النهارده',{act:due.length?'startReview':'',block:1,kind:due.length?'primary':'gray'})}</div></div>`;
+  const ts=typeStats().filter(x=>x.n>0).sort((a,b)=>b.rate-a.rate);
+  out+=`<div class="card"><div class="row"><span style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange)">${ic('target',24)}</span>
+    <div class="grow"><div class="t-head">تدريب ذكي</div><div class="t-sub">${w?`بيركّز على أسئلة ${w.t} لأنك بتغلط فيها`:'أسئلة مختارة حسب أخطائك'}</div></div></div>
+    ${ts.length?`<div class="chips" style="margin-top:var(--s3)">${ts.map(x=>ui.badge(`${x.t} · غلط ${pc(x.rate)}%`,x.rate>=.4?'red':x.rate>=.25?'orange':'green')).join('')}</div>`:''}
+    <div style="margin-top:var(--s3)">${ui.btn(pool.length?'ابدأ تدريب (10 أسئلة)':'ضيف أسئلة الأول',{act:pool.length?'startPractice':'addQuestion',block:1,kind:pool.length?'primary':'gray'})}</div></div>`;
+  out+=`<div class="card"><div class="row"><span style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)">${ic('exam',24)}</span>
+    <div class="grow"><div class="t-head">امتحان شخصي</div><div class="t-sub">امتحان يتولّد من الدروس اللي ذاكرتها</div></div></div>
+    <div style="margin-top:var(--s3)">${ui.btn('ابدأ امتحان',{act:'startExam',block:1,kind:'tint'})}</div></div>`;
+  const up=S.lessons.filter(l=>l.studied&&!isDue(l)).sort((a,b)=>a.next.localeCompare(b.next)).slice(0,6);
+  if(up.length)out+=ui.sec('الجاي',ui.group(up.map(l=>ui.cell({icon:'clock',cc:cls(l.sid),title:esc(l.title),sub:esc((subj(l.sid)||{}).name||''),end:whenTxt(l.next),act:'openLesson',data:{id:l.id}}))));
+  return out+'</div>';
+}
+
+/* ---------- Mistakes (notes style) ---------- */
+function mistakesScreen(){
+  const add=`<button class="ibtn" data-act="addMistake" aria-label="سجّل خطأ">${ic('plus',20,2.2)}</button>`;
+  let out=title('سجل الأخطاء',add);
+  const all=S.questions.filter(q=>(q.wrong||0)>0);
+  const flt=[['all','الكل'],['rep','المتكررة'],...TYPES.map(t=>[t,t])];
+  out+=`<div class="chips scrollx" style="margin-bottom:var(--s4)">${flt.map(([k,l])=>ui.chip(l,{on:mFilter===k,act:'mfilter',data:{v:k}})).join('')}</div>`;
+  let list=all.filter(q=>mFilter==='all'||(mFilter==='rep'?q.wrong>=2:q.type===mFilter));
+  list.sort((a,b)=>(b.wrong-a.wrong)||String(b.lastWrong).localeCompare(String(a.lastWrong)));
+  if(!all.length)return out+ui.empty('note','مفيش أخطاء متسجلة','سجّل أي سؤال غلطت فيه مع سبب الغلط. البرنامج هيستخدمه في تدريبك.',ui.btn('سجّل أول خطأ',{act:'addMistake',icon:'plus'}));
+  if(!list.length)return out+ui.empty('check','مفيش نتايج','مفيش أخطاء بالفلتر ده.','');
+  return out+`<div class="stack" style="--gap:10px">${list.map(q=>{
+    const l=lesson(q.lid),r=lastReason(q);
+    return `<button class="note ${cls(q.sid)}" data-act="mistakeDetail" data-id="${q.id}">
+      <div class="meta">${ui.badge(esc((subj(q.sid)||{}).name||''),'tint')}${ui.badge(esc(q.type))}<span class="t-foot" style="margin-inline-start:auto">${q.lastWrong?whenTxt(q.lastWrong).replace('متأخر','من').replace('النهارده','النهارده'):''}</span></div>
+      <div class="q">${esc(q.q)}</div>
+      <div class="ans">${esc(q.a)}</div>
+      <div class="meta">${q.wrong>=2?ui.badge(`غلطت ${q.wrong} مرات`,'red'):ui.badge('غلطة واحدة','orange')}${r?ui.badge(esc(r),'accent'):''}${l?`<span class="t-foot">${esc(l.title)}</span>`:''}</div></button>`}).join('')}</div>`;
+}
+
+/* ---------- Progress dashboard ---------- */
+function progressScreen(){
+  let out=title('التقدم');
+  if(!S.lessons.length)return out+ui.empty('chart','لسه مفيش بيانات','ضيف دروس وذاكر، وهنا هتشوف تقدمك ونقاط ضعفك.',ui.btn('ضيف مادة',{act:'addSubject',icon:'plus'}));
+  const o=overall(),late=lateLessons().length,rep=S.questions.filter(q=>(q.wrong||0)>=2).length;
+  const t=TODAY(),days=[...Array(7)].map((_,i)=>addD(t,i-6)),mins=days.map(minsOn),mx=Math.max(30,...mins);
+  const wk=mins.reduce((a,b)=>a+b,0),ex=S.exams[S.exams.length-1];
+  out+='<div class="stack">';
+  out+=`<div class="card row" style="gap:var(--s5)">${ui.ring(o.pct*100,{size:112,stroke:12,center:`<b style="font-size:26px">${pc(o.pct)}%</b><span class="t-foot">إنجاز</span>`})}
+    <div class="grow"><div class="t-head">${o.studied} من ${o.total} درس اتذاكر</div><div class="t-sub" style="margin:2px 0 var(--s3)">مستوى الإتقان ${pc(o.mastery)}%</div>${ui.bar(o.mastery*100,'',1)}</div></div>`;
+  out+=`<div class="grid2">
+    <button class="tile" data-act="tab" data-tab="review" style="border:0;text-align:start"><b style="color:${late?'var(--red)':'var(--green)'}">${late}</b><span>دروس متأخرة</span></button>
+    <button class="tile" data-act="repMist" style="border:0;text-align:start"><b style="color:${rep?'var(--orange)':'var(--green)'}">${rep}</b><span>أخطاء متكررة</span></button>
+    <div class="tile"><b>${wk}</b><span>دقيقة مذاكرة الأسبوع</span></div>
+    <div class="tile"><b>${ex?pc(ex.right/ex.n)+'%':'—'}</b><span>${ex?'آخر امتحان':'لسه ماعملتش امتحان'}</span></div></div>`;
+  out+=ui.sec('الأسبوع ده',`<div class="card"><div class="week">${days.map((d,i)=>`<div class="${d===t?'today':''} ${mins[i]?'has':''}"><span>${mins[i]||''}</span><i style="height:${Math.max(6,mins[i]/mx*84)}px"></i><span>${pd(d).toLocaleDateString('ar-EG',{weekday:'short'})}</span></div>`).join('')}</div></div>`);
+  const ts=typeStats(),w=weakType();
+  out+=ui.sec('نقاط ضعفك',`<div class="card">${ts.map(x=>`<div class="mini-line"><span class="l">${x.t}</span><div class="grow"><div class="bar thick"><i style="width:${x.n?Math.max(4,x.rate*100):0}%;background:${x.rate>=.4?'var(--red)':x.rate>=.25?'var(--orange)':'var(--green)'}"></i></div></div><span class="r">${x.n?pc(x.rate)+'%':'—'}</span></div>`).join('')}
+    <p class="t-foot" style="margin-top:var(--s3)">${w?`${ic('sparkle',14)} بنرفع أولوية أسئلة <b>${w.t}</b> في التدريب والامتحان لأن نسبة غلطك فيها أعلى.`:'حل تدريب أو سجّل أخطاء، والبرنامج هيبدأ يتعلم من نمطك.'}</p></div>`);
+  const rc={};S.questions.forEach(q=>(q.reasons||[]).forEach(x=>{if(x.r)rc[x.r]=(rc[x.r]||0)+1}));
+  const rs=Object.entries(rc).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  if(rs.length)out+=ui.sec('أكتر أسباب غلطك',`<div class="card"><div class="chips">${rs.map(([k,v])=>ui.badge(`${esc(k)} · ${v}`,'accent')).join('')}</div></div>`);
+  out+=ui.sec('المواد',ui.group(S.subjects.map(s=>{const st=subStats(s.id);return `<div class="cell c${s.c}"><span class="body"><span class="ttl">${esc(s.name)}</span><span class="sub" style="margin-bottom:6px">${st.studied} من ${st.total} درس${st.late?` · ${st.late} متأخر`:''}</span>${ui.bar(st.pct*100)}</span><span class="end"><b style="color:var(--label);font-size:17px">${pc(st.pct)}%</b></span></div>`})));
+  return out+'</div>';
+}
+
+/* ============================ PAGES ============================ */
+function subjectPage(id){
+  const s=subj(id);if(!s)return'<div class="scroll"></div>';
+  const ls=S.lessons.filter(l=>l.sid===id),st=subStats(id);
+  let h=`<div class="scroll ${'c'+s.c}"><div class="navrow"><button class="ibtn" data-act="close" aria-label="رجوع">${ic('back',20,2.2)}</button><button class="ibtn" data-act="editSubject" data-id="${id}" aria-label="تعديل">${ic('edit',18)}</button></div>
+    <h1 class="t-title" style="margin:0 var(--s2) var(--s1);color:var(--cc)">${esc(s.name)}</h1>
+    <p class="t-sub" style="margin:0 var(--s2) var(--s4)">${s.exam?`الامتحان ${whenTxt(s.exam).replace('متأخر','فات من')}`:'من غير ميعاد امتحان'} · اتذاكر ${pc(st.pct)}%</p>
+    <div class="stack"><div class="card">${ui.bar(st.pct*100,'',1)}</div>`;
+  h+=ls.length?ui.sec('الدروس',ui.group(ls.map(l=>ui.cell({icon:l.studied?'check':'book',cc:'c'+s.c,title:esc(l.title),sub:l.studied?'المراجعة: '+whenTxt(l.next):'لسه ما اتذاكرش',end:l.studied?ui.dots(l.stage+1,'c'+s.c):'',act:'openLesson',data:{id:l.id}}))))
+    :ui.empty('book','مفيش دروس','ضيف أول درس في المادة دي.','');
+  h+=ui.btn('درس جديد',{act:'addLesson',data:{sid:id},block:1,kind:'tint',icon:'plus'});
+  return h+'</div></div>';
+}
+function lessonPage(id){
+  const l=lesson(id);if(!l)return'<div class="scroll"></div>';
+  const s=subj(l.sid)||{name:'',c:0},qs=S.questions.filter(q=>q.lid===id);
+  let h=`<div class="scroll ${'c'+s.c}"><div class="navrow"><button class="ibtn" data-act="close" aria-label="رجوع">${ic('back',20,2.2)}</button><span></span></div>
+    <div style="margin:0 var(--s2) var(--s4)">${ui.badge(esc(s.name),'tint')}<h1 class="t-title" style="margin-top:var(--s2)">${esc(l.title)}</h1></div><div class="stack">`;
+  if(l.studied){
+    h+=`<div class="card"><div class="row" style="justify-content:space-between"><span>المراجعة الجاية</span>${ui.badge(whenTxt(l.next),isLate(l)?'red':isDue(l)?'orange':'green')}</div>
+      <div class="row" style="justify-content:space-between;margin-top:var(--s3)"><span>مستوى الإتقان</span>${ui.dots(l.stage+1,'c'+s.c)}</div>
+      <div class="row" style="justify-content:space-between;margin-top:var(--s3)"><span>عدد المراجعات</span><b>${l.reviews||0}</b></div></div>
+      <div class="btns">${ui.btn('راجع دلوقتي',{act:'reviewOne',data:{id}})}${ui.btn('جلسة تركيز',{act:'startFocus',data:{lid:id},kind:'tint'})}</div>`;
+  }else{
+    h+=`<div class="card t-sub" style="text-align:center">الدرس ده لسه ما اتذاكرش. أول ما تذاكره هيتحسب له جدول مراجعة تلقائي.</div>
+      <div class="btns">${ui.btn('جلسة تركيز',{act:'startFocus',data:{lid:id}})}${ui.btn('اتذاكر خلاص',{act:'markStudied',data:{id},kind:'tint'})}</div>`;
+  }
+  h+=ui.sec('ملخصك',`<div class="group"><div class="frow col"><textarea class="in" data-chg="notes" data-id="${id}" placeholder="اكتب أهم النقاط بكلامك. هتظهر لك ورا كارت المراجعة.">${esc(l.notes||'')}</textarea></div></div>`);
+  h+=ui.sec(`الأسئلة (${qs.length})`,qs.length?ui.group(qs.map(q=>ui.cell({icon:q.wrong?'alert':'check',title:esc(q.q),sub:`${esc(q.type)} · صح ${q.right||0} / غلط ${q.wrong||0}`,act:'mistakeDetail',data:{id:q.id}}))):`<div class="card t-sub" style="text-align:center">ضيف أسئلة عشان تدخل في التدريب والامتحان.</div>`,
+    `<button class="link" data-act="addQuestion" data-lid="${id}">+ سؤال</button>`);
+  h+=ui.btn('احذف الدرس',{act:'delLesson',data:{id},kind:'danger',block:1,icon:'trash'});
+  return h+'</div></div>';
+}
+
+/* ============================ SHEETS / FORMS ============================ */
+let form={};
+const val=id=>{const e=$(id);return e?e.value.trim():''};
+const sheetNav=(t,save)=>`<div class="snav"><button data-act="close">إلغاء</button><b>${t}</b><button class="save" data-act="${save}">حفظ</button></div>`;
+const lessonOptions=sel=>S.lessons.map(l=>`<option value="${l.id}" ${l.id===sel?'selected':''}>${esc((subj(l.sid)||{}).name||'')} — ${esc(l.title)}</option>`).join('');
+const subjOptions=sel=>S.subjects.map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${esc(s.name)}</option>`).join('');
+const pickChips=(g,items,cur)=>`<div class="chips" data-group="${g}">${items.map(i=>ui.chip(esc(i),{on:i===cur,data:{g,v:i}})).join('')}</div>`;
+
+const A={};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t||!t.dataset.act)return;const f=A[t.dataset.act];if(f){e.preventDefault();f(t,e)}});
+document.addEventListener('change',e=>{const t=e.target.closest('[data-chg]');if(t&&A[t.dataset.chg])A[t.dataset.chg](t,e)});
+
+A.tab=el=>{tab=el.dataset.tab;renderAll();const s=$('root').querySelector('.scroll');if(s)s.scrollTop=0};
+A.close=()=>closeLayer();
+A.mfilter=el=>{mFilter=el.dataset.v;renderAll()};
+A.repMist=()=>{mFilter='rep';tab='mistakes';renderAll()};
+A.pick=el=>{const g=el.dataset.g,v=el.dataset.v;form[g]=v;el.parentElement.querySelectorAll('.chip,.sw').forEach(c=>c.classList.toggle('on',c===el))};
+
+/* subject sheet */
+A.addSubject=()=>subjectSheet();
+A.editSubject=el=>subjectSheet(el.dataset.id);
+function subjectSheet(id){
+  const s=id?subj(id):null;form={c:s?s.c:S.subjects.length%6,id};
+  openLayer('sheet',()=>sheetNav(s?'تعديل المادة':'مادة جديدة','saveSubject')+`<div class="sbody">
+    <div class="group"><div class="frow"><label>الاسم</label><input class="in" id="f-name" placeholder="مثلاً: فيزياء" value="${esc(s?s.name:'')}" maxlength="40"></div>
+      <div class="frow"><label>ميعاد الامتحان</label><input class="in" id="f-exam" type="date" value="${s?s.exam||'':''}" style="text-align:end"></div></div>
+    <p class="flabel" style="margin-top:var(--s4)">اللون</p>
+    <div class="group"><div class="frow"><div class="swatches" data-group="c">${COLORS.map(c=>`<button class="sw c${c}${form.c===c?' on':''}" data-act="pickColor" data-v="${c}" aria-label="لون ${c+1}"></button>`).join('')}</div></div></div>
+    ${s?`<div style="margin-top:var(--s5)">${ui.btn('احذف المادة',{act:'delSubject',data:{id},kind:'danger',block:1,icon:'trash'})}</div>`:''}</div>`);
+  setTimeout(()=>{const e=$('f-name');if(e&&!s)e.focus()},380);
+}
+A.pickColor=el=>{form.c=+el.dataset.v;el.parentElement.querySelectorAll('.sw').forEach(c=>c.classList.toggle('on',c===el))};
+A.saveSubject=()=>{
+  const name=val('f-name');if(!name)return toast('اكتب اسم المادة');
+  if(form.id){const s=subj(form.id);s.name=name;s.c=form.c;s.exam=val('f-exam')}
+  else S.subjects.push({id:uid(),name,c:form.c,exam:val('f-exam')});
+  save();closeLayer();
+};
+A.delSubject=el=>{
+  if(!confirm('تحذف المادة وكل دروسها وأسئلتها؟'))return;
+  const id=el.dataset.id;
+  S.subjects=S.subjects.filter(s=>s.id!==id);S.lessons=S.lessons.filter(l=>l.sid!==id);S.questions=S.questions.filter(q=>q.sid!==id);
+  save();closeLayer();closeLayer();
+};
+A.openSubject=el=>{const id=el.dataset.id;openLayer('page',()=>subjectPage(id),true)};
+
+/* lesson sheet */
+A.addLesson=el=>{
+  if(!S.subjects.length){toast('ضيف مادة الأول');return A.addSubject()}
+  const sid=el.dataset&&el.dataset.sid||S.subjects[0].id;form={};
+  openLayer('sheet',()=>sheetNav('درس جديد','saveLesson')+`<div class="sbody"><div class="group">
+    <div class="frow"><label>العنوان</label><input class="in" id="f-title" placeholder="مثلاً: قوانين نيوتن" maxlength="80"></div>
+    <div class="frow"><label>المادة</label><select class="in" id="f-sid">${subjOptions(sid)}</select></div>
+    <div class="frow"><label>اتذاكر بالفعل؟</label><label class="switch"><input type="checkbox" id="f-studied"><span></span></label></div></div>
+    <p class="flabel" style="margin-top:var(--s3)">لو اتذاكر، هيبدأ جدول المراجعة من النهارده.</p></div>`);
+  setTimeout(()=>{const e=$('f-title');if(e)e.focus()},380);
+};
+A.saveLesson=()=>{
+  const t=val('f-title');if(!t)return toast('اكتب عنوان الدرس');
+  const l={id:uid(),sid:val('f-sid'),title:t,notes:'',studied:false,stage:0,next:'',reviews:0};
+  if($('f-studied').checked)markStudied(l);
+  S.lessons.push(l);save();closeLayer();
+};
+A.openLesson=el=>{const id=el.dataset.id;openLayer('page',()=>lessonPage(id),true)};
+A.notes=el=>{const l=lesson(el.dataset.id);if(l){l.notes=el.value;save()}};
+A.markStudied=el=>{const l=lesson(el.dataset.id);markStudied(l);save();renderAll();toast('اتحسب لك جدول مراجعة: '+whenTxt(l.next))};
+A.delLesson=el=>{
+  if(!confirm('تحذف الدرس وأسئلته؟'))return;
+  const id=el.dataset.id;S.lessons=S.lessons.filter(l=>l.id!==id);S.questions=S.questions.filter(q=>q.lid!==id);save();closeLayer();
+};
+
+/* question sheet */
+A.addQuestion=el=>{
+  if(!S.lessons.length){toast('ضيف درس الأول');return A.addLesson({dataset:{}})}
+  const lid=el.dataset&&el.dataset.lid||S.lessons[0].id;form={type:'حفظ'};
+  openLayer('sheet',()=>sheetNav('سؤال جديد','saveQuestion')+`<div class="sbody"><div class="group">
+    <div class="frow"><label>الدرس</label><select class="in" id="f-lid">${lessonOptions(lid)}</select></div>
+    <div class="frow col"><textarea class="in" id="f-q" placeholder="السؤال"></textarea></div>
+    <div class="frow col"><textarea class="in" id="f-a" placeholder="الإجابة الصح"></textarea></div></div>
+    <p class="flabel" style="margin-top:var(--s4)">نوع السؤال</p>${pickChips('type',TYPES,'حفظ')}</div>`);
+};
+A.saveQuestion=()=>{
+  const q=val('f-q'),a=val('f-a');if(!q||!a)return toast('اكتب السؤال والإجابة');
+  const l=lesson(val('f-lid'));
+  S.questions.push({id:uid(),lid:l.id,sid:l.sid,q,a,type:form.type||'حفظ',right:0,wrong:0,streak:0,reasons:[]});
+  save();closeLayer();toast('اتضاف السؤال');
+};
+
+/* mistake sheet */
+A.addMistake=()=>{
+  if(!S.lessons.length){toast('ضيف درس الأول');return A.addLesson({dataset:{}})}
+  form={type:'حفظ',reason:''};
+  openLayer('sheet',()=>sheetNav('سجّل خطأ','saveMistake')+`<div class="sbody"><div class="group">
+    <div class="frow"><label>الدرس</label><select class="in" id="f-lid">${lessonOptions('')}</select></div>
+    <div class="frow col"><textarea class="in" id="f-q" placeholder="السؤال اللي غلطت فيه"></textarea></div>
+    <div class="frow col"><textarea class="in" id="f-a" placeholder="الإجابة الصح"></textarea></div></div>
+    <p class="flabel" style="margin-top:var(--s4)">نوع السؤال</p>${pickChips('type',TYPES,'حفظ')}
+    <p class="flabel" style="margin-top:var(--s4)">سبب الغلط</p>${pickChips('reason',REASONS,'')}</div>`);
+};
+A.saveMistake=()=>{
+  const qt=val('f-q'),a=val('f-a');if(!qt||!a)return toast('اكتب السؤال والإجابة الصح');
+  const l=lesson(val('f-lid'));
+  let q=S.questions.find(x=>x.lid===l.id&&x.q===qt);
+  if(!q){q={id:uid(),lid:l.id,sid:l.sid,q:qt,a,type:form.type||'حفظ',right:0,wrong:0,streak:0,reasons:[]};S.questions.push(q)}
+  else{q.a=a;q.type=form.type||q.type}
+  recordAnswer(q,false,form.reason||null);
+  closeLayer();toast(q.wrong>1?`غلطتها ${q.wrong} مرات، هتاخد أولوية`:'اتسجل الخطأ');
+};
+A.mistakeDetail=el=>{
+  const id=el.dataset.id;
+  openLayer('sheet',()=>{const q=quest(id);if(!q)return'';const l=lesson(q.lid);
+    return `<div class="snav"><span style="min-width:56px"></span><b>تفاصيل</b><button class="save" data-act="close">تم</button></div><div class="sbody">
+    <div class="chips" style="margin-bottom:var(--s3)">${ui.badge(esc((subj(q.sid)||{}).name||''),'tint '+cls(q.sid))}${ui.badge(esc(q.type))}${l?ui.badge(esc(l.title)):''}</div>
+    <div class="group"><div class="frow col"><span class="t-foot">السؤال</span><b>${esc(q.q)}</b></div><div class="frow col"><span class="t-foot">الإجابة الصح</span><span>${esc(q.a)}</span></div></div>
+    <div class="grid3" style="margin-top:var(--s4)"><div class="tile"><b style="color:var(--red)">${q.wrong||0}</b><span>غلط</span></div><div class="tile"><b style="color:var(--green)">${q.right||0}</b><span>صح</span></div><div class="tile"><b>${q.streak||0}</b><span>صح ورا بعض</span></div></div>
+    ${lastReason(q)?`<p class="flabel" style="margin-top:var(--s4)">آخر سبب: ${esc(lastReason(q))}</p>`:''}
+    <div style="margin-top:var(--s5)">${ui.btn('احذف السؤال',{act:'delQ',data:{id},kind:'danger',block:1,icon:'trash'})}</div></div>`},true);
+};
+A.delQ=el=>{S.questions=S.questions.filter(q=>q.id!==el.dataset.id);save();closeLayer()};
+
+/* settings */
+A.settings=()=>openLayer('sheet',()=>`<div class="snav"><span style="min-width:56px"></span><b>الإعدادات</b><button class="save" data-act="close">تم</button></div><div class="sbody stack">
+  <div><p class="flabel">الاسم</p><div class="group"><div class="frow"><input class="in" id="f-nm" data-chg="setName" value="${esc(S.settings.name)}" maxlength="24"></div></div></div>
+  <div><p class="flabel">المظهر</p>${ui.seg([['auto','تلقائي'],['light','فاتح'],['dark','داكن']],S.settings.theme,'theme')}</div>
+  <div><p class="flabel">البيانات</p><div class="group">
+    ${ui.cell({icon:'sparkle',title:'بيانات تجريبية',sub:'تضيف مواد ودروس وأسئلة للتجربة',act:'demo'})}
+    ${ui.cell({icon:'note',title:'تصدير نسخة احتياطية',sub:'ملف JSON',act:'exportData'})}
+    ${ui.cell({icon:'trash',title:'مسح كل البيانات',act:'resetAll',chev:false})}</div></div></div>`,true);
+A.setName=el=>{S.settings.name=el.value.trim()||'أحمد';save();renderAll()};
+A.theme=el=>{S.settings.theme=el.dataset.v;save();applyTheme();renderAll()};
+A.exportData=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ahmed-study-os-backup.json';a.click()};
+A.resetAll=()=>{if(!confirm('هتمسح كل بياناتك نهائي. متأكد؟'))return;const t=S.settings;S=structuredClone(DEF);S.settings=t;save();while(L.length)closeLayer();renderAll()};
+function applyTheme(){
+  const m=matchMedia('(prefers-color-scheme: dark)').matches,t=S.settings.theme,dark=t==='dark'||(t==='auto'&&m);
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  document.querySelector('meta[name=theme-color]').content=dark?'#000000':'#F2F2F7';
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+
+/* ============================ REVIEW SESSION ============================ */
+let R=null;
+A.startReview=()=>{const q=dueLessons().map(l=>l.id);if(!q.length)return toast('مفيش مراجعات مستحقة');runReview(q)};
+A.reviewOne=el=>runReview([el.dataset.id]);
+function runReview(q){R={q,i:0,done:0};openLayer('full',reviewView,false)}
+function reviewView(){
+  const nav=`<div class="navrow"><button class="ibtn" data-act="close" aria-label="إغلاق">${ic('x',20,2.2)}</button><span class="t-sub">${Math.min(R.i+1,R.q.length)} من ${R.q.length}</span><span style="width:36px"></span></div>`;
+  if(R.i>=R.q.length)return `<div class="scroll">${nav}${ui.empty('check','خلصت المراجعة',`راجعت ${R.done} ${R.done===1?'درس':'دروس'}. مواعيدك الجاية اتحسبت تلقائي.`,ui.btn('تمام',{act:'close'}))}</div>`;
+  const l=lesson(R.q[R.i]),s=subj(l.sid)||{name:'',c:0},nq=S.questions.filter(q=>q.lid===l.id).length;
+  const rate=(k,lbl,cl)=>`<button class="btn ${cl}" data-act="rate" data-r="${k}">${lbl}<span class="rate-note">${intTxt(previewInt(l,k))}</span></button>`;
+  return `<div class="scroll sess c${s.c}">${nav}<div style="margin:var(--s2) 0 var(--s4)">${ui.bar((R.i/R.q.length)*100)}</div>
+    <div class="flip" data-act="flip"><div class="flipper">
+      <div class="face"><div class="face-top">${ui.badge(esc(s.name),'tint')}${isLate(l)?ui.badge(whenTxt(l.next),'red'):''}</div><div class="face-main">${esc(l.title)}</div><div class="face-hint">افتكر أهم النقاط قبل ما تقلب الكارت</div></div>
+      <div class="face back"><div class="face-top">${ui.badge('ملخصك','accent')}</div><div class="face-main sm" style="white-space:pre-wrap">${l.notes?esc(l.notes):'مفيش ملخص متسجل للدرس ده.'}</div>${nq?`<div class="face-hint">فيه ${nq} أسئلة على الدرس</div>`:''}</div></div></div>
+    <div style="margin-top:var(--s5)"><div class="ctl-a">${ui.btn('اقلب الكارت',{act:'flip',block:1})}</div>
+      <div class="ctl-b"><p class="t-sub" style="text-align:center;margin-bottom:var(--s3)">افتكرته بسهولة قد إيه؟</p><div class="btns rate">${rate('hard','صعب','danger')}${rate('good','تمام','tint')}${rate('easy','سهل','good')}</div></div></div></div>`;
+}
+A.flip=el=>{const sess=el.closest('.sess');if(!sess||sess.classList.contains('flipped'))return;sess.classList.add('flipped');const f=sess.querySelector('.flip');if(f)f.classList.add('on');if(X)X.shown=true};
+A.rate=el=>{const l=lesson(R.q[R.i]);schedule(l,el.dataset.r);touch();save();R.i++;R.done++;paint(topLayer())};
+
+/* ============================ FOCUS SESSION ============================ */
+let F=null;
+A.startFocus=el=>{
+  if(!S.subjects.length){toast('ضيف مادة الأول');return A.addSubject()}
+  const lid=el&&el.dataset&&el.dataset.lid||'';const l=lid?lesson(lid):null;
+  F={phase:'setup',sid:l?l.sid:(S.subjects[0]||{}).id,lid,mins:25,total:0,left:0,endAt:0,run:false,tick:null,logged:0};
+  openLayer('full',focusView,false,()=>{clearInterval(F&&F.tick)});
+};
+function focusView(){
+  const nav=`<div class="navrow"><button class="ibtn" data-act="focusClose" aria-label="إغلاق">${ic('x',20,2.2)}</button><span class="t-head">جلسة تركيز</span><span style="width:36px"></span></div>`;
+  if(F.phase==='setup'){
+    const ls=S.lessons.filter(l=>l.sid===F.sid);
+    return `<div class="scroll">${nav}<div class="stack" style="margin-top:var(--s5)">
+      <div class="focusring">${ui.ring(0,{size:200,stroke:14,center:`<div class="big-time" style="font-size:44px">${String(F.mins).padStart(2,'0')}:00</div><span class="t-foot">دقيقة</span>`})}</div>
+      <div><p class="flabel">المدة</p><div class="chips">${[15,25,45,60].map(m=>ui.chip(m+' د',{on:F.mins===m,act:'fmins',data:{v:m}})).join('')}</div></div>
+      <div class="group"><div class="frow"><label>المادة</label><select class="in" data-chg="fsub">${subjOptions(F.sid)}</select></div>
+        <div class="frow"><label>الدرس</label><select class="in" data-chg="flesson"><option value="">من غير درس محدد</option>${ls.map(l=>`<option value="${l.id}" ${l.id===F.lid?'selected':''}>${esc(l.title)}</option>`).join('')}</select></div></div>
+      ${ui.btn('ابدأ',{act:'fstart',block:1,icon:'play'})}</div></div>`;
+  }
+  if(F.phase==='run'){
+    const s=subj(F.sid)||{name:''},l=F.lid?lesson(F.lid):null;
+    return `<div class="scroll">${nav}<div style="text-align:center;margin-top:var(--s4)"><div class="t-head">${esc(l?l.title:s.name)}</div><div class="t-sub">${esc(l?s.name:'مذاكرة حرة')}</div></div>
+      <div class="focusring">${ui.ring(0,{size:270,stroke:16,center:`<div class="big-time" id="fClock">--:--</div>`})}</div>
+      <div class="btns">${ui.btn(F.run?'وقّف':'كمّل',{act:'fpause',kind:'gray',icon:F.run?'pause':'play'})}${ui.btn('خلصت',{act:'ffinish'})}</div></div>`;
+  }
+  const l=F.lid?lesson(F.lid):null;
+  return `<div class="scroll">${nav}${ui.empty('check',`خلصت ${F.logged} دقيقة`,l&&!l.studied?'علّم الدرس إنه اتذاكر عشان يبدأ جدول المراجعة.':'الجلسة اتسجلت في تقدمك.',
+    (l&&!l.studied?`<div class="stack" style="margin-top:0">${ui.btn('علّم الدرس إنه اتذاكر',{act:'fdone',data:{m:1},block:1})}${ui.btn('لا، كمّل بعدين',{act:'fdone',data:{m:0},kind:'gray',block:1})}</div>`:ui.btn('تمام',{act:'fdone',data:{m:0},block:1})))}</div>`;
+}
+A.fmins=el=>{F.mins=+el.dataset.v;paint(topLayer())};
+A.fsub=el=>{F.sid=el.value;F.lid='';paint(topLayer())};
+A.flesson=el=>{F.lid=el.value};
+A.fstart=()=>{F.phase='run';F.total=F.left=F.mins*60;F.endAt=Date.now()+F.total*1000;F.run=true;paint(topLayer());ftick();F.tick=setInterval(ftick,500)};
+function ftick(){
+  if(!F||F.phase!=='run')return;
+  if(F.run)F.left=Math.max(0,Math.round((F.endAt-Date.now())/1000));
+  const c=$('fClock');if(c)c.textContent=`${pad(Math.floor(F.left/60))}:${pad(F.left%60)}`;
+  const circ=document.querySelectorAll('.layer.full .ring circle')[1];
+  if(circ){const r=+circ.getAttribute('r'),cc=2*Math.PI*r;circ.setAttribute('stroke-dashoffset',cc*(1-(F.total-F.left)/F.total))}
+  document.title=(F.run?`${pad(Math.floor(F.left/60))}:${pad(F.left%60)} · `:'')+'أحمد Study OS';
+  if(F.run&&F.left<=0){beep();ffinish(true)}
+}
+A.fpause=()=>{
+  if(F.run){F.run=false;F.left=Math.max(0,Math.round((F.endAt-Date.now())/1000))}
+  else{F.run=true;F.endAt=Date.now()+F.left*1000}
+  paint(topLayer());ftick();
+};
+function ffinish(auto){
+  clearInterval(F.tick);document.title='أحمد Study OS';
+  const elapsed=F.run?F.total-Math.max(0,Math.round((F.endAt-Date.now())/1000)):F.total-F.left;
+  const m=auto===true?F.mins:Math.floor(elapsed/60);
+  if(m>=1){S.sessions.push({id:uid(),d:TODAY(),m,sid:F.sid,lid:F.lid||''});touch();save()}
+  F.logged=m;F.run=false;F.phase='done';paint(topLayer());
+}
+A.ffinish=()=>ffinish();
+A.fdone=el=>{if(el.dataset.m==='1'){const l=lesson(F.lid);if(l&&!l.studied){markStudied(l);save();toast('اتحسب لك جدول مراجعة')}}closeLayer()};
+A.focusClose=()=>{
+  if(F.phase==='run'&&!confirm('تخرج من الجلسة؟ الوقت اللي عدّى هيتسجل لو عدّى دقيقة.'))return;
+  if(F.phase==='run'){ffinish();}
+  closeLayer();
+};
+
+/* ============================ PRACTICE + EXAM (shared engine) ============================ */
+let X=null;
+A.startPractice=()=>{
+  const pool=qPool();if(!pool.length){toast('ضيف أسئلة الأول');return}
+  X={mode:'practice',step:'run',q:pickQ(pool,10).map(q=>q.id),i:0,shown:false,asking:false,ans:'',res:[]};
+  openLayer('full',xView,false);
+};
+A.startExam=()=>{
+  if(!S.questions.length){toast('ضيف أسئلة الأول');if(S.lessons.length)A.addQuestion({dataset:{}});return}
+  X={mode:'exam',step:'setup',sid:'',n:10,q:[],i:0,shown:false,asking:false,ans:'',res:[]};
+  openLayer('full',xView,false);
+};
+function xNav(right){return `<div class="navrow"><button class="ibtn" data-act="close" aria-label="إغلاق">${ic('x',20,2.2)}</button>${right||'<span></span>'}<span style="width:36px"></span></div>`}
+function xView(){
+  if(X.step==='setup'){
+    const pool=qPool(X.sid),n=Math.min(X.n,pool.length);
+    return `<div class="scroll">${xNav('<span class="t-head">امتحان شخصي</span>')}<div class="stack" style="margin-top:var(--s4)">
+      <p class="t-sub" style="margin:0 var(--s2)">الأسئلة بتتختار من الدروس اللي ذاكرتها، والأسئلة اللي بتغلط فيها بتاخد أولوية.</p>
+      <div><p class="flabel">المادة</p><div class="chips">${ui.chip('الكل',{on:!X.sid,act:'xsub',data:{v:''}})}${S.subjects.map(s=>ui.chip(esc(s.name),{on:X.sid===s.id,act:'xsub',data:{v:s.id}})).join('')}</div></div>
+      <div><p class="flabel">عدد الأسئلة</p><div class="chips">${[5,10,15].map(k=>ui.chip(k,{on:X.n===k,act:'xn',data:{v:k}})).join('')}</div></div>
+      <div class="card t-sub" style="text-align:center">${pool.length?`متاح ${pool.length} سؤال · الامتحان هيكون ${n} أسئلة`:'مفيش أسئلة متاحة. ضيف أسئلة لدروس اتذاكرت.'}</div>
+      ${ui.btn('ابدأ الامتحان',{act:pool.length?'xgo':'',block:1,kind:pool.length?'primary':'gray'})}</div></div>`;
+  }
+  const total=X.q.length;
+  if(X.step==='result'){
+    const ok=X.res.filter(r=>r.ok).length,p=total?ok/total:0;
+    const wrong=X.res.filter(r=>!r.ok);
+    const msg=p>=.8?'ممتاز، مستواك قوي':p>=.5?'كويس، لسه فيه مراجعة':'محتاج تراجع الدروس دي تاني';
+    return `<div class="scroll">${xNav(`<span class="t-head">${X.mode==='exam'?'نتيجة الامتحان':'خلص التدريب'}</span>`)}<div class="stack" style="margin-top:var(--s4)">
+      <div class="focusring" style="margin:0">${ui.ring(p*100,{size:180,stroke:16,color:p>=.8?'var(--green)':p>=.5?'var(--orange)':'var(--red)',center:`<b style="font-size:38px">${pc(p)}%</b><span class="t-foot">${ok} من ${total}</span>`})}</div>
+      <p class="t-head" style="text-align:center">${msg}</p>
+      ${wrong.length?ui.sec('اتسجلت في سجل الأخطاء',ui.group(wrong.map(r=>{const q=quest(r.qid);return q?ui.cell({icon:'alert',title:esc(q.q),sub:esc(q.a),chev:false}):''}))):`<div class="card t-sub" style="text-align:center">مفيش أخطاء المرة دي.</div>`}
+      <div class="btns">${ui.btn('تمام',{act:'close',kind:'gray'})}${ui.btn(X.mode==='exam'?'امتحان تاني':'تدريب تاني',{act:X.mode==='exam'?'xagain':'xagainP'})}</div></div></div>`;
+  }
+  const q=quest(X.q[X.i]);if(!q)return'';
+  const s=subj(q.sid)||{name:'',c:0},l=lesson(q.lid);
+  const head=xNav(`<span class="t-sub">سؤال ${X.i+1} من ${total}</span>`)+`<div style="margin:var(--s2) 0 var(--s4)">${ui.bar((X.i/total)*100)}</div>`;
+  const tags=`${ui.badge(esc(s.name),'tint')}${ui.badge(esc(q.type))}${l?ui.badge(esc(l.title)):''}`;
+  const reasons=`<div class="stack"><p class="t-head" style="text-align:center">إيه سبب الغلط؟</p><div class="chips" style="justify-content:center">${REASONS.map(r=>ui.chip(r,{act:'xreason',data:{v:r}})).join('')}</div>${ui.btn('تخطي',{act:'xnext',kind:'plain',block:1})}</div>`;
+  const grade=`<div class="btns">${ui.btn('غلط',{act:'xgrade',data:{ok:0},kind:'danger',icon:'x'})}${ui.btn('صح',{act:'xgrade',data:{ok:1},kind:'good',icon:'check'})}</div>`;
+  if(X.mode==='practice'){
+    const on=X.shown||X.asking;
+    return `<div class="scroll sess c${s.c} ${on?'flipped':''}">${head}
+      <div class="flip ${on?'on static':''}" data-act="flip"><div class="flipper">
+        <div class="face"><div class="face-top">${tags}</div><div class="face-main">${esc(q.q)}</div><div class="face-hint">فكّر في الإجابة، وبعدين اقلب الكارت</div></div>
+        <div class="face back"><div class="face-top">${ui.badge('الإجابة','accent')}</div><div class="face-main sm">${esc(q.a)}</div></div></div></div>
+      <div style="margin-top:var(--s5)">${X.asking?reasons:`<div class="ctl-a">${ui.btn('اقلب الكارت',{act:'flip',block:1})}</div><div class="ctl-b">${grade}</div>`}</div></div>`;
+  }
+  return `<div class="scroll c${s.c}">${head}<div class="stack">
+    <div class="card"><div class="chips" style="margin-bottom:var(--s3)">${tags}</div><div class="t-title" style="font-size:22px;overflow-wrap:anywhere">${esc(q.q)}</div></div>
+    ${!X.shown?`<div class="group"><div class="frow col"><textarea class="in" id="e-ans" placeholder="اكتب إجابتك هنا (اختياري)" style="min-height:96px"></textarea></div></div>${ui.btn('اعرض الإجابة',{act:'xshow',block:1})}`
+    :`${X.ans?`<div class="card"><p class="t-foot">إجابتك</p><p style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(X.ans)}</p></div>`:''}
+      <div class="card" style="background:color-mix(in srgb,var(--green) 12%,var(--surface))"><p class="t-foot">الإجابة الصح</p><p class="t-head" style="overflow-wrap:anywhere">${esc(q.a)}</p></div>
+      ${X.asking?reasons:grade}`}</div></div>`;
+}
+A.xsub=el=>{X.sid=el.dataset.v;paint(topLayer())};
+A.xn=el=>{X.n=+el.dataset.v;paint(topLayer())};
+A.xgo=()=>{const pool=qPool(X.sid);X.q=pickQ(pool,Math.min(X.n,pool.length)).map(q=>q.id);X.step='run';X.i=0;X.res=[];X.shown=false;X.asking=false;paint(topLayer())};
+A.xagain=()=>{X.step='setup';paint(topLayer())};
+A.xagainP=()=>{const pool=qPool();X.q=pickQ(pool,10).map(q=>q.id);X.step='run';X.i=0;X.res=[];X.shown=false;X.asking=false;paint(topLayer())};
+A.xshow=()=>{const e=$('e-ans');X.ans=e?e.value.trim():'';X.shown=true;paint(topLayer())};
+A.xgrade=el=>{
+  const q=quest(X.q[X.i]),ok=el.dataset.ok==='1';
+  recordAnswer(q,ok,null);X.res.push({qid:q.id,ok});
+  if(ok)xAdvance();else{X.asking=true;paint(topLayer())}
+};
+A.xreason=el=>{const q=quest(X.q[X.i]);setLastReason(q,el.dataset.v);xAdvance()};
+A.xnext=()=>xAdvance();
+function xAdvance(){
+  X.i++;X.shown=false;X.asking=false;X.ans='';
+  if(X.i>=X.q.length){
+    X.step='result';
+    if(X.mode==='exam'){const ok=X.res.filter(r=>r.ok).length;S.exams.push({d:TODAY(),n:X.q.length,right:ok,sid:X.sid});save()}
+  }
+  paint(topLayer());
+}
+
+/* ============================ DEMO DATA ============================ */
+A.demo=()=>{
+  if(S.subjects.length&&!confirm('هيضيف بيانات تجريبية فوق بياناتك الحالية. تكمل؟'))return;
+  const t=TODAY(),sb=[['فيزياء',0,12],['كيمياء',1,19],['رياضيات',2,0]].map(([name,c,e])=>({id:uid(),name,c,exam:e?addD(t,e):''}));
+  const mk=(si,title,ago,stage,nx)=>({id:uid(),sid:sb[si].id,title,notes:'',studied:ago!==null,studiedAt:ago!==null?addD(t,-ago):'',stage,next:ago!==null?addD(t,nx):'',reviews:ago!==null?stage:0});
+  const ls=[mk(0,'قوانين نيوتن',6,1,-1),mk(0,'الشغل والطاقة',3,0,0),mk(0,'الكهرباء الساكنة',null,0,0),mk(1,'الاتزان الكيميائي',9,2,2),mk(1,'الأحماض والقواعد',2,0,0),mk(2,'التفاضل',5,1,1),mk(2,'التكامل',null,0,0)];
+  ls[0].notes='القانون الأول: القصور الذاتي.\nالثاني: F = m·a.\nالثالث: لكل فعل رد فعل مساوي له في المقدار ومضاد في الاتجاه.';
+  ls[3].notes='لو غيّرنا أي عامل (تركيز، ضغط، حرارة) الاتزان بيتحرك عشان يقلل التأثير (لو شاتيليه).';
+  const Q=(li,q,a,type,w,r)=>{const l=ls[li];return{id:uid(),lid:l.id,sid:l.sid,q,a,type,right:r,wrong:w,streak:w?0:r,last:t,lastWrong:w?addD(t,-1):'',
+    reasons:[...Array(w)].map((_,i)=>({d:addD(t,-(i+1)),r:type==='حساب'?(i%2?'استعجال':'خطأ في الحساب'):type==='فهم'?'مفهوم مش واضح':type==='تطبيق'?'فهمت السؤال غلط':'نسيت القانون'}))}};
+  const qs=[
+   Q(0,'ما نص القانون الثاني لنيوتن؟','التسارع يتناسب طرديًا مع القوة المحصلة وعكسيًا مع الكتلة (F = m·a).','حفظ',0,3),
+   Q(0,'جسم كتلته 4 kg وقوة 20 N، احسب التسارع.','5 m/s² لأن a = F ÷ m','حساب',3,1),
+   Q(0,'ليه الراكب بيندفع للأمام لما العربية تفرمل فجأة؟','بسبب القصور الذاتي (القانون الأول).','فهم',1,2),
+   Q(1,'اكتب قانون الشغل.','W = F · d · cosθ','حفظ',1,2),
+   Q(1,'قوة 10 N تحرك جسم 3 m في نفس الاتجاه، احسب الشغل.','30 جول','حساب',2,0),
+   Q(1,'إمتى بيكون الشغل صفر رغم وجود قوة؟','لما تكون القوة عمودية على الإزاحة.','فهم',1,1),
+   Q(3,'إيه اللي بيحصل للاتزان لو زودنا تركيز المتفاعلات؟','بيتحرك ناحية النواتج (مبدأ لو شاتيليه).','تطبيق',2,1),
+   Q(3,'اكتب تعبير ثابت الاتزان Kc للتفاعل N₂ + 3H₂ ⇌ 2NH₃','Kc = [NH₃]² ÷ ([N₂][H₂]³)','حساب',3,1),
+   Q(4,'عرّف الحمض حسب أرهينيوس.','مادة بتعطي أيون H⁺ في الماء.','حفظ',0,2),
+   Q(4,'احسب pH لمحلول تركيز H⁺ فيه 0.001 M.','pH = 3','حساب',2,1),
+   Q(5,'ما مشتقة x²؟','2x','حفظ',0,4),
+   Q(5,'اشتق f(x) = 3x³ + 2x','f′(x) = 9x² + 2','حساب',1,2),
+   Q(5,'إيه معنى المشتقة هندسيًا؟','ميل المماس للمنحنى عند النقطة.','فهم',0,1)];
+  const mins=[25,50,0,45,30,60,20],sess=[];
+  mins.forEach((m,i)=>{if(m){const d=addD(t,i-6);sess.push({id:uid(),d,m,sid:sb[i%3].id,lid:''});if(!S.days.includes(d))S.days.push(d)}});
+  S.subjects.push(...sb);S.lessons.push(...ls);S.questions.push(...qs);S.sessions.push(...sess);
+  save();while(L.length)closeLayer();tab='today';renderAll();toast('اتضافت بيانات تجريبية');
+};
+
+/* ============================ BOOT ============================ */
+load().then(()=>{applyTheme();renderAll()});
+/* PWA: يشتغل كتطبيق ويشتغل أوفلاين */
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
